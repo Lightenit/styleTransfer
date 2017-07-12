@@ -80,10 +80,12 @@ def build_style_list(doc, O_value):
             style_flag = 0
             for sen_sty in style_list:
                 if sen_sty.style_eq(style):
+                    sen_sty.add(sen)
                     style_flag = 1
                     break
             if style_flag == 0:
-                sensty = 
+                sensty = sen_style(sen, style)
+                style_list.append(sensty)
 
 
 
