@@ -38,19 +38,23 @@ def diction_set(doc):
 
 def style_extract(sen, O_value):
     style = []
+    target = []
     for i in range(len(sen)):
         if sen[i][-1] == O_value:
             style.append(sen[i][0])
         else:
+            target.append(sen[i][0])
             style.append(-1)
-    return style
+    return style, target
 
 
 class sen_style:
-    def __init__(self, sen, style):
+    def __init__(self, sen, style, tar):
         self.style = style
         self.placenum = style.count(-1)
         self.placedic = dict()
+        self.target = []
+        self.target.append(tar)
         for i in range(len(sen)):
             if style[i] == -1:
                 self.placedic[i] = [sen[i][-1]]
@@ -61,8 +65,9 @@ class sen_style:
             return 1
         else return 0
 
-    def style_add(self, sen):
+    def style_add(self, sen, tar):
         self.count = self.count + 1
+        self.target.append(tar)
         for i in range(len(sen)):
             if self.style[i] == -1:
                 if sen[i][-1] not in self.placedic[i]:
@@ -72,22 +77,34 @@ class sen_style:
 def build_style_list(doc, O_value):
     style_list = []
     for sen in doc:
-        style = style_extract(sen, O_value)
+        style, tar = style_extract(sen, O_value)
         if style_list == []:
-            sensty = sen_style(sen, style)
+            sensty = sen_style(sen, style, tar)
             style_list.append(sensty)
         else:
             style_flag = 0
             for sen_sty in style_list:
                 if sen_sty.style_eq(style):
-                    sen_sty.add(sen)
+                    sen_sty.add(sen, tar)
                     style_flag = 1
                     break
             if style_flag == 0:
-                sensty = sen_style(sen, style)
+                sensty = sen_style(sen, style, tar)
                 style_list.append(sensty)
+    return style_list
 
+def build_train_set(style_list):
+    train_set = []
+    for i in range(len(style_list)):
+        for j in range(len(style_list[i].target)):
+            train_set.append([i]+style_list[i].target[j])
+    return train_set
 
+if __name__ == "__main__":
+    
+
+#def generate_batch(batch_size, train_set):
+#    batch = 
 
             
 
