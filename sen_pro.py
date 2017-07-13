@@ -101,6 +101,14 @@ def build_train_set(style_list):
     return train_set
 
 if __name__ == "__main__":
+    doc = readdoc(path)
+    for sen in doc:
+        sen = senten_tag(sen)
+    pro_doc, word_dic, ne_dic, word_reversed_dic, O_value = diction_set(doc)
+    style_list = build_style_list(pro_doc, O_value)
+    train_set = build_train_set(style_list)
+
+
     
 
 #def generate_batch(batch_size, train_set):
