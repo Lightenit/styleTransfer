@@ -107,6 +107,57 @@ if __name__ == "__main__":
     pro_doc, word_dic, ne_dic, word_reversed_dic, O_value = diction_set(doc)
     style_list = build_style_list(pro_doc, O_value)
     train_set = build_train_set(style_list)
+    embedding_size = 300
+    batch_size = 100
+    Word_Vec = np.zeros((len(word_dic), embedding_size))
+    model = gensim.models.KeyedVectors.load_word2vec_format('GoogleNews-vectors-negative300.bin', binary = True)
+    for word in word_dic:
+        try:
+            Word_Vec[word_dic[word]] = model.wv[word]
+        except:
+            Word_Vec[word_dic[word]] = np.zeros(embedding_size)
+    graph = tf.Graph()
+    with graph.as_defalut():
+
+        train_inputs = tf.placeholder(tf.int32, shape = [batch_size])
+        train_labels = tf.placeholder(tf.int32, shape = [batch_size, 1])
+
+        with tf.device('/cpu:0'):
+
+            embeddings = tf.Variable(tf.random_uniform([len(style_list), embedding_size], -1.0, 1.0))
+            embed = tf.nn.embedding_lookup(embeddings, train_inputs)
+
+            nce_weights = tf.Variable(tf.truncated_normal([len(style_list), embedding_size], stddev=1.0 / math.sqrt(embedding_size)))
+
+            loss = tf.reduce_mean(weights = nce_weights, biaes=nce_biases, labels=train_labels, inputs=embed, num_sampled=num_sampled, num_classes=len(style_list))
+
+            optimizer = tf.train.GradientDesentOptimizer(1.0).minimize(loss)
+
+
+        num_steps = 100001
+
+        with tf.Session(graph=graph) as session:
+
+            init.run()
+            print("Initialized")
+
+            average_loss = 0
+
+            for step in xrange(num_steps):
+                batch_inputs, batch generate
+                feed_dict = {train_inputs: batch_inputs, train_labels: batch_labels}
+
+                _, loss_val = session.run([optimizer, loss], feed_dict = feed_dict)
+
+                average_loss += loss_val
+
+                if step % 2000 == 0:
+                    if step > 0:
+                        average_loss /= 2000
+                    print('Average loss at step ', step, ': ', average_loss)
+
+        final_embeddings = normalized_embeddings.eval()
+
 
 
     
