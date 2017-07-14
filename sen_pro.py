@@ -101,6 +101,11 @@ def build_train_set(style_list):
     return train_set
 
 def readdoc(path):
+    path = 'bbc'
+
+def generate_batch(batch_size, style_list,train_set):
+    batch = np.ndarray(shape=(batch_size), dtype = np.int32)
+
 
 
 if __name__ == "__main__":
