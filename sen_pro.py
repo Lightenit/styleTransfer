@@ -100,6 +100,9 @@ def build_train_set(style_list):
             train_set.append([i]+style_list[i].target[j])
     return train_set
 
+def readdoc(path):
+
+
 if __name__ == "__main__":
     doc = readdoc(path)
     for sen in doc:
