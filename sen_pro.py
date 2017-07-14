@@ -107,8 +107,10 @@ if __name__ == "__main__":
     pro_doc, word_dic, ne_dic, word_reversed_dic, O_value = diction_set(doc)
     style_list = build_style_list(pro_doc, O_value)
     train_set = build_train_set(style_list)
+    style_size = len(style_list)
     embedding_size = 300
     batch_size = 100
+    num_sampled = 64
     Word_Vec = np.zeros((len(word_dic), embedding_size))
     model = gensim.models.KeyedVectors.load_word2vec_format('GoogleNews-vectors-negative300.bin', binary = True)
     for word in word_dic:
@@ -124,12 +126,13 @@ if __name__ == "__main__":
 
         with tf.device('/cpu:0'):
 
-            embeddings = tf.Variable(tf.random_uniform([len(style_list), embedding_size], -1.0, 1.0))
+            embeddings = tf.Variable(tf.random_uniform([style_size, embedding_size], -1.0, 1.0))
             embed = tf.nn.embedding_lookup(embeddings, train_inputs)
 
-            nce_weights = tf.Variable(tf.truncated_normal([len(style_list), embedding_size], stddev=1.0 / math.sqrt(embedding_size)))
+            nce_weights = tf.Variable(tf.truncated_normal([style_size, embedding_size], stddev=1.0 / math.sqrt(embedding_size)))
+            nce_biases = tf.Variable(tf.zeros([style_size]))
 
-            loss = tf.reduce_mean(weights = nce_weights, biaes=nce_biases, labels=train_labels, inputs=embed, num_sampled=num_sampled, num_classes=len(style_list))
+            loss = tf.reduce_mean(tf.nn.nce_loss(weights = nce_weights, biaes=nce_biases, labels=train_labels, inputs=embed, num_sampled=num_sampled, num_classes=style_size))
 
             optimizer = tf.train.GradientDesentOptimizer(1.0).minimize(loss)
 
