@@ -107,6 +107,9 @@ def generate_batch(batch_size, style_list,train_set):
     batch = np.ndarray(shape=(batch_size), dtype = np.int32)
 
 
+def nce_loss_compute(embed, train_labels, batch_size, nce_num):
+    
+
 
 if __name__ == "__main__":
     doc = readdoc(path)
@@ -136,6 +139,12 @@ if __name__ == "__main__":
 
             embeddings = tf.Variable(tf.random_uniform([style_size, embedding_size], -1.0, 1.0))
             embed = tf.nn.embedding_lookup(embeddings, train_inputs)
+
+
+            loss = nce_loss_compute(embed, train_labels, batch_size, nce_num)
+
+
+
 
             nce_weights = tf.Variable(tf.truncated_normal([style_size, embedding_size], stddev=1.0 / math.sqrt(embedding_size)))
             nce_biases = tf.Variable(tf.zeros([style_size]))
