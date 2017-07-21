@@ -103,11 +103,29 @@ def build_train_set(style_list):
 def readdoc(path):
     path = 'bbc'
 
-def generate_batch(batch_size, style_list,train_set):
+def generate_batch(batch_size, style_list, train_set):
     batch = np.ndarray(shape=(batch_size), dtype = np.int32)
+    train_size = len(train_set)
+    train_indx = np.random.choice(train_size, batch_size, replace = False)
+
+    
 
 
-def nce_loss_compute(embed, train_labels, batch_size, nce_num):
+def nce_loss_compute(embed, train_labels, batch_size, train_negasam):
+    loss = tf.Variable(tf.zeros([batch_size]))
+    for i in range(batch_size):
+        posi = tf.matmul(embed[i], train_labels[i])
+        nega = tf.matmul(embed[i], train_negasam[i])
+        posi = tf.exp(posi)
+        nega = tf.exp(nega)
+        nor_con = tf.add(posi, tf.reduce_sum(nega))
+        posi = tf.div(posi, nor_con)
+        nega = tf.div(nega, nor_con)
+        loss[i] = tf.add(tf.log(posi), tf.reduce_sum(tf.log(nega)))
+    loss = tf.reduce_sum(loss)
+    return loss
+        
+
     
 
 
@@ -133,25 +151,17 @@ if __name__ == "__main__":
     with graph.as_defalut():
 
         train_inputs = tf.placeholder(tf.int32, shape = [batch_size])
-        train_labels = tf.placeholder(tf.int32, shape = [batch_size, 1])
+        train_labels = tf.placeholder(tf.int32, shape = [batch_size])
+        train_negasam = tf.placeholder(tf.int32, shape = [batch_size, nce_num])
 
         with tf.device('/cpu:0'):
 
             embeddings = tf.Variable(tf.random_uniform([style_size, embedding_size], -1.0, 1.0))
             embed = tf.nn.embedding_lookup(embeddings, train_inputs)
-
-
-            loss = nce_loss_compute(embed, train_labels, batch_size, nce_num)
-
-
-
-
-            nce_weights = tf.Variable(tf.truncated_normal([style_size, embedding_size], stddev=1.0 / math.sqrt(embedding_size)))
-            nce_biases = tf.Variable(tf.zeros([style_size]))
-
-            loss = tf.reduce_mean(tf.nn.nce_loss(weights = nce_weights, biaes=nce_biases, labels=train_labels, inputs=embed, num_sampled=num_sampled, num_classes=style_size))
-
+            loss = nce_loss_compute(embed, train_labels, batch_size, train_negasam)
             optimizer = tf.train.GradientDesentOptimizer(1.0).minimize(loss)
+            norm = tf.sqrt(tf.reduce_sum(tf.square(embeddings), 1, keep_dims = True))
+            normalized_embeddings = embeddings / norm
 
 
         num_steps = 100001
@@ -165,7 +175,7 @@ if __name__ == "__main__":
 
             for step in xrange(num_steps):
                 batch_inputs, batch generate
-                feed_dict = {train_inputs: batch_inputs, train_labels: batch_labels}
+                feed_dict = {train_inputs: batch_inputs, train_labels: batch_labels, train_negasam: batch_negasam}
 
                 _, loss_val = session.run([optimizer, loss], feed_dict = feed_dict)
 
