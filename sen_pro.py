@@ -103,10 +103,19 @@ def build_train_set(style_list):
 def readdoc(path):
     path = 'bbc'
 
-def generate_batch(batch_size, style_list, train_set):
+def generate_batch(batch_size, style_list, train_set, Word_Vec):
     batch = np.ndarray(shape=(batch_size), dtype = np.int32)
     train_size = len(train_set)
     train_indx = np.random.choice(train_size, batch_size, replace = False)
+    train_inputs = []
+    train_labels = []
+    train_negasam = []
+    for i in range(batch_size):
+        train_inputs.append(train_set[train_indx[i]][0])
+        tar = np.random.choice(train_set[train_indx[i][1:])
+        train_labels.append(Word_Vec[tar])
+
+    return train_inputs, train_labels, train_negasam
 
     
 
